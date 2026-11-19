@@ -1,6 +1,6 @@
 # ADR-0004 · Hospedagem, domínios e região
 
-- **Status:** Proposta
+- **Status:** ✅ Decidida 
 - **Requisitos:** RNF-003, RNF-005, RNF-010
 
 ## Contexto

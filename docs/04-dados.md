@@ -53,6 +53,8 @@ erDiagram
   APPOINTMENT ||--o{ APPOINTMENT_ITEM : "usa materiais"
   PRODUCT ||--o{ APPOINTMENT_ITEM : "referenciado por (opcional)"
 
+  /* TODO: Verificar relacionamentos */
+
   ORGANIZATION {
     uuid id PK
     string name
@@ -76,27 +78,16 @@ erDiagram
     uuid id PK
     uuid organization_id FK
     uuid technical_id FK
-    uuid system_plan FK
     string document
-    string card_hash
     timestamptz created_at
     timestamptz archived_at
   }
-  SYSTEM_PLAN {
-    uuid id PK
-    string name
-    decimal value
-    int duration_in_months
-    timestamptz created_at
-    timestamptz updated_at
-  } 
   TECHNICAL {
     uuid id PK
     uuid organization_id FK
     string name
     string phone
     string email
-    string password_hash
     uuid created_by FK
     timestamptz created_at
     timestamptz updated_at

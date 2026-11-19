@@ -1,6 +1,6 @@
 # ADR-0007 · Itens fora do MVP
 
-- **Status:** Proposta
+- **Status:** ✅ Decidida
 
 ## Contexto
 Time de uma pessoa. O protótipo mostrou que escopo largo gera bugs e código sem planejamento.

@@ -39,5 +39,5 @@ Lint → typecheck → unitários → integração (Postgres em serviço) → gi
 
 ## Metas
 
-- Cobertura das regras de negócio: TODO %.
+- Cobertura das regras de negócio: 100 %.
 - Nenhum teste de isolamento pulado (`skip`).

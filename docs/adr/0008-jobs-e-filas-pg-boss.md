@@ -1,6 +1,6 @@
 # ADR-0008 · Jobs e filas
 
-- **Status:** Proposta
+- **Status:** ✅ Decidida 
 - **Requisitos:** RF-MAN-003, RF-MAN-005, RF-ORC-004
 
 ## Contexto
@@ -12,7 +12,7 @@ O protótipo usava `node-cron` dentro da API: com mais de uma instância, o job 
 3. **Cron externo chamando endpoint** — frágil.
 
 ## Decisão
-**pg-boss**, com jobs **idempotentes**. Exige conexão direta ou em modo sessão com o banco (ver ADR-0004). <!-- TODO: validar com Supabase na PoC -->
+**pg-boss**, com jobs **idempotentes**. Exige conexão direta ou em modo sessão com o banco (ver ADR-0004). 
 
 ## Consequências
 - Menos fornecedores. Se a carga crescer, migrar para BullMQ atrás da interface `QueueService`.

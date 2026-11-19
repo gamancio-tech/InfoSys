@@ -1,6 +1,6 @@
 # ADR-0010 · Banco, ORM e contrato da API
 
-- **Status:** Decidida
+- **Status:** ✅ Decidida
 
 ## Decisão
 - **PostgreSQL no Supabase** (apenas Postgres + Storage; sem Neon, para reduzir fornecedores).

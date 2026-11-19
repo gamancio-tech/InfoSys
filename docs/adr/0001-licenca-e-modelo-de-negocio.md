@@ -1,6 +1,6 @@
 # ADR-0001 · Licença e modelo de negócio
 
-- **Status:** Pendente — **primeira decisão a tomar**, porque define o que entra no repositório público.
+- **Status:** ⏳ Pendente
 - **Data:** 2026-11-13
 - **Requisitos relacionados:** RNF-010
 

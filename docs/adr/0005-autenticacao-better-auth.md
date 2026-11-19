@@ -1,6 +1,6 @@
 # ADR-0005 · Autenticação com Better Auth
 
-- **Status:** Decidida
+- **Status:** ✅ Decidida 
 - **Requisitos:** RF-AUT-001…008
 
 ## Contexto

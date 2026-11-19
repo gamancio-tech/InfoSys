@@ -1,6 +1,6 @@
 # ADR-0006 · Geração de documentos
 
-- **Status:** Proposta
+- **Status:** ✅ Decidida 
 - **Requisitos:** RF-ORC-004, 008, 009 · RF-FIN-006…008
 
 ## Decisão por fase

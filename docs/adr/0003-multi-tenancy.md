@@ -1,6 +1,6 @@
 # ADR-0003 · Multi-tenancy
 
-- **Status:** Proposta
+- **Status:** ⏳ Pendente 
 - **Requisitos:** RN-002, RNF-004
 
 ## Contexto

@@ -1,6 +1,6 @@
 # ADR-0009 · Estratégia offline do PWA
 
-- **Status:** Proposta
+- **Status:** ⏳ Pendente
 - **Requisitos:** RF-PLT-001, RF-PLT-002
 
 ## Contexto
