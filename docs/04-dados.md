@@ -21,39 +21,41 @@
 
 ```mermaid
 erDiagram
+  ORGANIZATION ||--o{ ORGANIZATION_ADDRESS : "tem endereços"
   ORGANIZATION ||--o{ CUSTOMER : tem
   ORGANIZATION ||--o{ SERVICE_TYPE : configura
+  ORGANIZATION ||--o{ PRODUCT_TYPE : classifica
+  ORGANIZATION ||--o{ SUPPLIER : cadastra
   ORGANIZATION ||--o{ PRODUCT : cataloga
   ORGANIZATION ||--o{ QUOTE_TEMPLATE : possui
-  ORGANIZATION ||--o{ TECHNICAL : possui
-  ORGANIZATION ||--o{ TECHNICAL_CHIEF : possui
-
-  TECHNICAL_CHIEF ||--o{ SYSTEM_PLAN : possui
-
+  ORGANIZATION ||--o{ NOTE : registra
 
   CUSTOMER ||--o{ CUSTOMER_ADDRESS : "tem endereços"
-  CUSTOMER ||--o{ CUSTOMER_NOTE : "tem anotações"
+  CUSTOMER ||--o{ NOTE : "tem anotações (opcional)"
   CUSTOMER ||--o{ EQUIPMENT : "tem instalados"
   CUSTOMER ||--o{ APPOINTMENT : "é atendido em"
   CUSTOMER ||--o{ QUOTE : recebe
   CUSTOMER ||--o{ MAINTENANCE_PLAN : "tem planos"
+  CUSTOMER ||--o{ CUSTOMER_HISTORY : "possui histórico"
 
-  EQUIPMENT ||--o{ MAINTENANCE_PLAN : "é alvo de"
+  CUSTOMER_ADDRESS ||--o{ EQUIPMENT : localiza
+  EQUIPMENT ||--o{ MAINTENANCE_PLAN : "é alvo de (opcional)"
   SERVICE_TYPE ||--o{ APPOINTMENT : classifica
   SERVICE_TYPE ||--o{ MAINTENANCE_PLAN : "define serviço"
 
   MAINTENANCE_PLAN ||--o{ MAINTENANCE_REMINDER : gera
   MAINTENANCE_PLAN ||--o{ APPOINTMENT : "origina (opcional)"
 
+  PRODUCT_TYPE ||--o{ PRODUCT : categoriza
+  SUPPLIER ||--o{ PRODUCT : "fornece (opcional)"
+
   QUOTE ||--o{ QUOTE_ITEM : contém
-  QUOTE }o--|| QUOTE_TEMPLATE : usa
+  QUOTE }o--o| QUOTE_TEMPLATE : usa
   QUOTE ||--o{ APPOINTMENT : "converte em (opcional)"
   PRODUCT ||--o{ QUOTE_ITEM : "referenciado por (opcional)"
 
   APPOINTMENT ||--o{ APPOINTMENT_ITEM : "usa materiais"
   PRODUCT ||--o{ APPOINTMENT_ITEM : "referenciado por (opcional)"
-
-  /* TODO: Verificar relacionamentos */
 
   ORGANIZATION {
     uuid id PK
@@ -61,6 +63,7 @@ erDiagram
     string document
     string phone
     string email
+    string timezone
     timestamptz created_at
     timestamptz updated_at
     timestamptz archived_at
@@ -74,25 +77,6 @@ erDiagram
     string state
     string zip
   }
-  ORGANIZATION_TECHNICAL_CHIEF {
-    uuid id PK
-    uuid organization_id FK
-    uuid technical_id FK
-    string document
-    timestamptz created_at
-    timestamptz archived_at
-  }
-  TECHNICAL {
-    uuid id PK
-    uuid organization_id FK
-    string name
-    string phone
-    string email
-    uuid created_by FK
-    timestamptz created_at
-    timestamptz updated_at
-    timestamptz archived_at
-  }
   CUSTOMER {
     uuid id PK
     uuid organization_id FK
@@ -100,10 +84,14 @@ erDiagram
     string phone
     string email
     string document
+    uuid created_by FK
+    timestamptz created_at
+    timestamptz updated_at
     timestamptz archived_at
   }
   CUSTOMER_ADDRESS {
     uuid id PK
+    uuid organization_id FK
     uuid customer_id FK
     string label "opcional"
     string street
@@ -113,6 +101,7 @@ erDiagram
   }
   EQUIPMENT {
     uuid id PK
+    uuid organization_id FK
     uuid customer_id FK
     uuid address_id FK
     uuid note_id FK "opcional"
@@ -120,6 +109,9 @@ erDiagram
     string model
     string serial
     date installed_on
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz archived_at
   }
   SERVICE_TYPE {
     uuid id PK
@@ -127,19 +119,32 @@ erDiagram
     string name
     string color
     bool is_recurring_default
+    timestamptz archived_at
   }
   APPOINTMENT {
     uuid id PK
     uuid organization_id FK
     uuid customer_id FK
     uuid service_type_id FK
-    uuid assignee_member_id FK
+    uuid assignee_member_id FK "member (Better Auth)"
     uuid quote_id FK "opcional"
     uuid maintenance_plan_id FK "opcional"
     timestamptz starts_at
     timestamptz ends_at
     enum status
     decimal charged_amount
+    uuid created_by FK
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  APPOINTMENT_ITEM {
+    uuid id PK
+    uuid organization_id FK
+    uuid appointment_id FK
+    uuid product_id FK "opcional"
+    string name
+    decimal quantity
+    decimal unit_price
   }
   MAINTENANCE_PLAN {
     uuid id PK
@@ -153,17 +158,32 @@ erDiagram
     date last_done_on
     date next_due_on
     bool active
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz archived_at
   }
   MAINTENANCE_REMINDER {
     uuid id PK
+    uuid organization_id FK
     uuid maintenance_plan_id FK
     date cycle_due_on
     timestamptz sent_at
     enum channel
   }
+  QUOTE_TEMPLATE {
+    uuid id PK
+    uuid organization_id FK
+    string name
+    jsonb config "logo, cores, textos, PIX"
+    bool is_default
+    timestamptz created_at
+    timestamptz updated_at
+  }
   QUOTE {
     uuid id PK
     uuid organization_id FK
+    uuid customer_id FK
+    uuid template_id FK "opcional"
     string number "único por org/ano"
     int revision
     enum status
@@ -174,9 +194,13 @@ erDiagram
     decimal labor
     decimal total
     date valid_until
+    uuid created_by FK
+    timestamptz created_at
+    timestamptz updated_at
   }
   QUOTE_ITEM {
     uuid id PK
+    uuid organization_id FK
     uuid quote_id FK
     uuid product_id FK "opcional"
     string name
@@ -193,6 +217,9 @@ erDiagram
     string description
     decimal purchase_price
     decimal selling_price
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz archived_at
   }
   PRODUCT_TYPE {
     uuid id PK
@@ -207,25 +234,29 @@ erDiagram
     string name
     string description
     decimal gain_percent "opcional"
+    timestamptz archived_at
   }
-  note {
+  NOTE {
     uuid id PK
     uuid organization_id FK
+    uuid customer_id FK "opcional (RF-CLI-003 / RF-NOT-001)"
     string title
     string content
-    date created_at
-    date updated_at
-    date deleted_at
+    uuid created_by FK
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz archived_at
   }
-  customer_histoy {
+  CUSTOMER_HISTORY {
     uuid id PK
+    uuid organization_id FK
     uuid customer_id FK
-    uuid service_type_id FK
+    uuid service_type_id FK "opcional"
     uuid appointment_id FK "opcional"
     uuid quote_id FK "opcional"
     uuid product_id FK "opcional"
     uuid note_id FK "opcional"
-    date performed_at
+    timestamptz performed_at
     decimal charged_amount
   }
 ```
@@ -248,7 +279,7 @@ Resumo (detalhes e alternativas em [ADR-0003](adr/0003-multi-tenancy.md)):
 | `tipo`/`status` texto livre | Enum + `service_type` configurável | Domínio genérico |
 | Cliente com um `endereco` texto | `customer_address` (N) | Q: múltiplos endereços |
 | Sem equipamentos | `equipment` | Q: equipamentos instalados |
-| `observacoes` único | `customer_note` (N) | Q: anotações anexadas |
+| `observacoes` único | `note` (N, com `customer_id` opcional) | Q: anotações anexadas ao cliente ou gerais |
 | Sem recorrência | `maintenance_plan` + `maintenance_reminder` | Diferencial |
 | `Budget.numero @unique` global | Único por `organization_id` + ano | Multi-tenant |
 | `clienteNome/Telefone/Endereco` no agendamento | Só `customer_id` | Evitar duplicação; snapshot fica só no orçamento |
