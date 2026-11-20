@@ -5,22 +5,37 @@
   "description": "Monorepo do InfoSys — Gestão operacional para prestadores de serviço técnico.",
   "author": "Gustavo Amancio <gustavoamanciocom@gmail.com>",
   "license": "UNLICENSED",
+  "packageManager": "bun@1.4.4",
   "engines": {
     "node": ">=24.20.0"
   },
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "install:all": "bun install --cwd apps/api",
-    "dev": "bun run --cwd apps/api dev",
-    "dev:api": "bun run --cwd apps/api dev",
-    "build": "bun run --cwd apps/api build",
-    "lint": "bun run --cwd apps/api lint",
-    "lint:fix": "bun run --cwd apps/api lint:fix",
-    "format": "bun run --cwd apps/api format",
-    "format:check": "bun run --cwd apps/api format:check",
-    "typecheck": "bun run --cwd apps/api typecheck",
-    "test": "bun run --cwd apps/api test",
-    "test:cov": "bun run --cwd apps/api test:cov",
-    "test:e2e": "bun run --cwd apps/api test:e2e"
+    "dev": "bun run --parallel dev:api dev:web",
+    "dev:api": "bun run build:shared && bun run --cwd apps/api dev",
+    "dev:web": "bun run build:shared && bun run --cwd apps/web dev",
+    "build": "bun run build:shared && bun run --parallel build:api build:web",
+    "build:shared": "bun run --cwd packages/shared build",
+    "build:api": "bun run --cwd apps/api build",
+    "build:web": "bun run --cwd apps/web build",
+    "lint": "bun run build:shared && bun run --cwd packages/shared lint && bun run --cwd apps/api lint && bun run --cwd apps/web lint",
+    "lint:fix": "bun run build:shared && bun run --cwd apps/api lint:fix && bun run --cwd apps/web lint:fix",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/api/test/**/*.ts\" \"packages/*/src/**/*.ts\"",
+    "format:check": "prettier --check \"apps/*/src/**/*.{ts,tsx,css}\" \"apps/api/test/**/*.ts\" \"packages/*/src/**/*.ts\"",
+    "typecheck": "bun run build:shared && bun run --cwd packages/shared typecheck && bun run --cwd apps/api typecheck && bun run --cwd apps/web typecheck",
+    "test": "bun run build:shared && bun run --cwd apps/api test && bun run --cwd apps/web test",
+    "test:api": "bun run build:shared && bun run --cwd apps/api test",
+    "test:web": "bun run build:shared && bun run --cwd apps/web test",
+    "test:cov": "bun run build:shared && bun run --cwd apps/api test:cov",
+    "test:e2e": "bun run build:shared && bun run --cwd apps/api test:e2e",
+    "api:generate": "bun run --cwd apps/web api:generate"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "oxlint": "^1.94.0",
+    "oxlint-tsgolint": "^7.0.2007",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.2"
   }
 }

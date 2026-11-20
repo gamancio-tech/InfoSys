@@ -63,32 +63,36 @@
 ## 4. Arquitetura, Monorepo e Leis de Camadas
 
 ### Stack Tecnológica Oficial
-- **Frontend (`apps/web`):** React + TypeScript, Vite, Tailwind CSS, `vite-plugin-pwa`, cliente HTTP gerado via OpenAPI (`openapi-typescript` + `openapi-fetch` ou `orval`).
+- **Frontend (`apps/web`):** React + TypeScript, Vite, Tailwind CSS, `vite-plugin-pwa`, cliente HTTP gerado via OpenAPI (`openapi-typescript` + `openapi-fetch`).
 - **Backend (`apps/api`):** NestJS + TypeScript sobre Node.js `24.20.0`, `nestjs-zod`, Better Auth, Prisma ORM, `pg-boss`.
 - **Compartilhado (`packages/shared`):** Schemas Zod, enums e tipos comuns entre web e api.
 - **Persistência e Serviços:** PostgreSQL + Supabase Storage (buckets privados), Resend + React Email (e-mails transacionais), Sentry (erros e traces).
 
 ### Estrutura do Monorepo ([03-arquitetura.md](../docs/03-arquitetura.md))
+Gerenciado com **Bun workspaces** (`package.json` + `bun.lock` único na raiz, `.node-version` `24.20.0`, TypeScript 6 e ferramentas de qualidade compartilhadas):
 ```text
 .agents/                  # Contexto do projeto, rules (docs-as-code, commit-ci-deploy) e skills (infosys-context, docs-sync, commit-and-deploy)
-.github/workflows/        # CI no GitHub Actions (ci.yml: jobs security e api)
-.githooks/                # Hook nativo de pre-commit (bloqueio de .env/chaves + gitleaks)
+.github/workflows/        # CI no GitHub Actions (ci.yml: jobs security, shared, api, web)
+.githooks/                # Hook nativo de pre-commit (bloqueio de .env/chaves + gitleaks git --staged)
+.node-version             # Pin da versão do Node.js (24.20.0)
+docker-compose.yml        # PostgreSQL 16 local para desenvolvimento e testes
 apps/
-  api/                    # NestJS (Monólito Modular)
+  api/                    # @infosys/api · NestJS (Monólito Modular, prefixo global /v1)
     src/
       modules/            # Domínio: customers, appointments, maintenance, quotes, catalog,
                           #          inventory, finance, invoices, files, notifications
       platform/           # Infra transversal: auth, tenancy, database, queue, mail, storage, documents
+      app.setup.ts        # Configuração compartilhada entre main.ts e testes E2E
       main.ts
     prisma/               # schema.prisma + migrations
-    test/                 # Testes de integração/isolamento + factories
-  web/                    # React + Vite + Tailwind (PWA)
+    test/                 # Testes de integração/E2E (jest-e2e.config.ts) + factories
+  web/                    # @infosys/web · React + Vite + Tailwind v4 + PWA
     src/
       features/           # Espelha os módulos de domínio da API
-      shared/             # Componentes de UI, hooks, api-client gerado
+      shared/             # Componentes de UI, hooks (useOnlineStatus), api-client gerado (openapi-fetch)
       app/                # Rotas, providers, configuração do PWA
 packages/
-  shared/                 # Schemas Zod, enums, tipos comuns
+  shared/                 # @infosys/shared · Enums, constantes e schemas Zod comuns
 docs/                     # Documentação docs-as-code + ADRs
 ```
 
@@ -184,8 +188,8 @@ Em código, banco de dados e rotas, utilizar sempre o termo em inglês correspon
 
 ### Testes Obrigatórios, Pré-Commit e CI ([08-testes.md](../docs/08-testes.md), [07-seguranca.md](../docs/07-seguranca.md))
 - **Alinhamento Pré-commit vs CI:**
-  - **Pré-commit local (`.githooks/pre-commit`):** Focado em feedback instantâneo (< 1s) para bloquear arquivos `.env`/`.pem`/`.key` no stage e rodar `gitleaks protect --staged` antes do commit existir localmente.
-  - **CI (`.github/workflows/ci.yml`):** Barreira completa no GitHub Actions com 2 jobs paralelos: `security` (`gitleaks`) e `api` (`format:check` Prettier → `lint` Oxlint type-aware → `typecheck` → `test` unitários Jest em Node 24.20.0 → `test:e2e` com Postgres 16 em serviço → `build`).
+  - **Pré-commit local (`.githooks/pre-commit`):** Focado em feedback instantâneo (< 1s) para bloquear arquivos `.env`/`.env.*`/`.pem`/`.key` (exceto `.env.example`) e rodar `gitleaks git --staged --redact --verbose` antes do commit existir localmente.
+  - **CI (`.github/workflows/ci.yml`):** Barreira completa no GitHub Actions (permissões mínimas `read`, cache de Bun, versões fixas via `.node-version` e `packageManager`) com 4 jobs paralelos: `security` (`gitleaks`), `shared` (`format:check` Prettier + lint/typecheck/build de `@infosys/shared`), `api` (`lint` Oxlint type-aware → `typecheck` → unitários Jest em Node 24.20.0 → `test:e2e` com Postgres 16 → `build`) e `web` (`lint` Oxlint type-aware → `typecheck` → Vitest → `build` Vite + PWA).
 1. **Isolamento Multi-tenant (`RNF-004`):** Para cada controller/endpoint, testar com dois usuários de organizações distintas (Org A e Org B); Org B jamais pode ler, listar, editar ou excluir dados da Org A (deve receber `404`).
 2. **Regras de Negócio (`RN-*`, `RNF-011`):** Meta de 100% de cobertura unitária (Jest na API, Vitest na Web) com ID no nome do teste.
 3. **Precisão Monetária (`RN-011`):** Testes de cálculo de orçamento/totais usando `Decimal` e casos de arredondamento.

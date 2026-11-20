@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./infosys-logo.svg" alt="InfoSys — Sistema Integrado de Serviços" width="420" />
+<img src="./apps/web/public/infosys-logo.svg" alt="InfoSys — Sistema Integrado de Serviços" width="420" />
 
 <p>
   <strong>Gestão operacional para prestadores de serviço técnico em campo</strong><br />
@@ -99,7 +99,7 @@ Veja os diagramas C4 completos (Contexto e Contêineres) e as leis de dependênc
 | **Banco de Dados** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=000000) | Banco único com `organization_id` + Row-Level Security ([ADR-0003](docs/adr/0003-multi-tenancy.md)) |
 | **Armazenamento** | ![Supabase Storage](https://img.shields.io/badge/Supabase_Storage-3ECF8E?style=flat-square&logo=supabase&logoColor=000000) | Buckets privados por organização (`org/{id}/...`) acessados via URLs assinadas |
 | **Autenticação** | ![Better Auth](https://img.shields.io/badge/Better_Auth-0F172A?style=flat-square&logo=shield&logoColor=38BDF8) | Sessões baseadas em cookie *HttpOnly* + plugin `organization` e RBAC ([ADR-0005](docs/adr/0005-autenticacao-better-auth.md)) |
-| **Jobs & Filas** | ![pg-boss](https://img.shields.io/badge/pg--boss-336791?style=flat-square&logo=postgresql&logoColor=white) | Filas transacionais sobre PostgreSQL com chaves de idempotência ([ADR-0008](docs/adr/0008-jobs-e-filas-pg-boss.md)) <!-- TODO: confirmar na ADR-0008 --> |
+| **Jobs & Filas** | ![pg-boss](https://img.shields.io/badge/pg--boss-336791?style=flat-square&logo=postgresql&logoColor=white) | Filas transacionais sobre PostgreSQL com chaves de idempotência ([ADR-0008](docs/adr/0008-jobs-e-filas-pg-boss.md)) |
 | **E-mail & PDF** | ![Resend](https://img.shields.io/badge/Resend-000000?style=flat-square&logo=resend&logoColor=white) ![React Email](https://img.shields.io/badge/React_Email-0284C7?style=flat-square&logo=react&logoColor=white) ![PDF](https://img.shields.io/badge/React--PDF-EC1C24?style=flat-square&logo=adobeacrobatreader&logoColor=white) | E-mails transacionais e geração de PDF em worker sem Chromium ([ADR-0006](docs/adr/0006-geracao-de-documentos.md)) <!-- TODO: confirmar --> |
 | **Runtime & Qualidade** | ![Node.js](https://img.shields.io/badge/Node.js_24.20-339933?style=flat-square&logo=nodedotjs&logoColor=white) ![Bun](https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white) ![Jest](https://img.shields.io/badge/Jest-C21325?style=flat-square&logo=jest&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) | Node.js em produção (Bun opcional para pacotes) ([ADR-0002](docs/adr/0002-runtime-node-vs-bun.md)), Oxlint, Prettier, Gitleaks e Jest |
 
@@ -107,18 +107,18 @@ Veja os diagramas C4 completos (Contexto e Contêineres) e as leis de dependênc
 
 ## 💻 Como rodar localmente
 
-<!-- TODO: preencher quando existir o docker-compose. Esqueleto: -->
+Pré-requisitos: **Node.js `24.20.0`** (`.node-version`), **Bun `1.4.4+`**, **Docker** (PostgreSQL 16) e **Gitleaks** (`winget install Gitleaks.Gitleaks` no Windows).
 
 ```bash
 git clone <repo> && cd <repo>
-bun run prepare                             # ativa o hook local .githooks/pre-commit (gitleaks)
-bun run install:all                         # instala dependências dos pacotes do monorepo
-cp apps/api/.env.example apps/api/.env      # preencher variáveis
-cp apps/web/.env.example apps/web/.env
-docker compose up -d                        # Postgres local
-bun run db:migrate && bun run db:seed
-bun run dev                                 # web: :5173 · api: :3000
+bun install                                 # instala todos os workspaces e ativa .githooks/pre-commit
+cp apps/api/.env.example apps/api/.env      # preencher variáveis da API
+cp apps/web/.env.example apps/web/.env      # preencher variáveis do Web
+docker compose up -d                        # PostgreSQL 16 local (:5432)
+bun run dev                                 # sobe web (:5173) e api (:3000) em paralelo
 ```
+
+<!-- TODO: adicionar `bun run db:migrate && bun run db:seed` quando o Prisma for configurado na Fase 0 -->
 
 Variáveis de ambiente, topologia de conexões (`DATABASE_URL` vs `DIRECT_URL`) e procedimentos de deploy estão documentados em [docs/09-operacao.md](docs/09-operacao.md).
 

@@ -17,7 +17,7 @@ flowchart TB
   prestador["👤 Prestador de serviço<br/>(proprietário / admin / técnico)"]
   clientefinal["👤 Cliente final<br/>(recebe orçamento, aviso)"]
 
-  sistema["<b>NomeDoProduto</b><br/>Agenda, clientes, orçamentos,<br/>manutenção recorrente"]
+  sistema["<b>InfoSys</b><br/>Agenda, clientes, orçamentos,<br/>manutenção recorrente"]
 
   email["Resend<br/>e-mail transacional"]
   pagamento["Gateway de pagamento<br/>(Asaas / Stripe) — Fase 2"]
@@ -65,28 +65,33 @@ flowchart LR
 
 ## Estrutura do repositório (monorepo)
 
+Gerenciado via **Bun workspaces** (`package.json` + `bun.lock` únicos na raiz, TypeScript 6 e ferramentas de lint/formatação compartilhadas):
+
 ```
 .agents/                  # contexto do projeto, rules e skills para trabalho assistido por IA
-.github/workflows/        # esteira de CI (gitleaks, lint, typecheck, testes, build)
+.github/workflows/        # esteira de CI (security, shared, api, web)
 .githooks/                # hook nativo de pre-commit (bloqueio de .env/chaves + gitleaks)
+.node-version             # pin da versão de produção do Node.js (24.20.0)
+docker-compose.yml        # PostgreSQL 16 local para desenvolvimento e testes de integração
 apps/
-  api/                    # NestJS
+  api/                    # @infosys/api (NestJS)
     src/
       modules/            # um módulo por domínio
         customers/  appointments/  maintenance/  quotes/  catalog/
         inventory/  finance/  invoices/  files/  notifications/
       platform/           # infraestrutura transversal
         auth/  tenancy/  database/  queue/  mail/  storage/  documents/
+      app.setup.ts        # configuração HTTP compartilhada (prefixo /v1, trust proxy)
       main.ts
     prisma/               # schema.prisma + migrations
-    test/
-  web/                    # React
+    test/                 # testes de integração/E2E (jest-e2e.config.ts)
+  web/                    # @infosys/web (React + Vite + Tailwind + PWA)
     src/
       features/           # espelha os módulos da API
-      shared/             # ui, hooks, api-client gerado
+      shared/             # ui, hooks, api-client gerado (openapi-fetch)
       app/                # rotas, providers, PWA
 packages/
-  shared/                 # schemas Zod, enums, tipos comuns
+  shared/                 # @infosys/shared (enums, constantes e schemas Zod comuns)
 docs/                     # documentação docs-as-code + ADRs
 ```
 

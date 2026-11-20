@@ -41,7 +41,7 @@ apps/api/
 ## Como Rodar Localmente
 
 ```bash
-# Instalar dependências
+# Instalar dependências (na raiz do monorepo — Bun workspaces)
 bun install
 
 # Iniciar em modo de desenvolvimento (watch)
@@ -55,7 +55,7 @@ bun run build
 bun run start:prod
 ```
 
-Por padrão, a API responde em `http://localhost:3000`.
+Por padrão, a API responde em `http://localhost:3000/v1` (com `/health` e `/api/*` fora do prefixo `/v1`).
 
 ---
 

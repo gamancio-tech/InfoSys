@@ -54,4 +54,4 @@
 
 ## Cliente tipado no front
 
-`bun run api:generate` gera o cliente a partir do OpenAPI (ex.: `openapi-typescript` + `openapi-fetch`, ou `orval`). Sem tipos de API escritos à mão no front.
+`bun run api:generate` gera o contrato (`apps/web/src/shared/api/schema.d.ts`) a partir do OpenAPI usando `openapi-typescript`, consumido pelo cliente `openapi-fetch` em `apps/web/src/shared/api/client.ts`. Sem tipos de API escritos à mão no front.

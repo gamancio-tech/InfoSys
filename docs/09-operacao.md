@@ -25,8 +25,8 @@
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | API | Credenciais OAuth para login com Google (`RF-AUT-002`) |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | API | Storage (só no servidor) |
 | `RESEND_API_KEY` / `MAIL_FROM` | API | E-mail |
-| `SENTRY_DSN` | API/Web | Erros |
-| `VITE_API_URL` | Web | URL da API |
+| `SENTRY_DSN` / `VITE_SENTRY_DSN` | API/Web | Erros |
+| `VITE_API_URL` | Web | URL base da API (`/v1`) |
 
 Nunca commitar valores reais.
 

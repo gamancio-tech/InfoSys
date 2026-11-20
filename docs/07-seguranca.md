@@ -19,11 +19,12 @@
 - Ver [ADR-0003](adr/0003-multi-tenancy.md) e [04](04-dados.md).
 - Teste automatizado por endpoint (A não acessa B). Falha no CI bloqueia o merge.
 - 404 em vez de 403 para recurso de outra organização.
+- **Cache offline do PWA:** como as URLs de leitura (`/v1/*`) não carregam `organizationId`, o logout e a troca de organização ativa **devem** limpar o cache do Service Worker (`caches.delete('infosys-api-read-cache')`) para impedir exposição transitória de dados entre organizações ou sessões no mesmo dispositivo.
 
 ## Segredos
 
 - Nada de segredo no repositório; `.env.example` só com nomes. Defesa em duas camadas complementares: 🔴
-  - **Pré-commit local (`.githooks/pre-commit`):** bloqueia o stage de arquivos `.env`/`.pem`/`.key` e roda `gitleaks protect --staged` antes do commit ser gravado localmente (evitando `push` acidental no repositório público).
+  - **Pré-commit local (`.githooks/pre-commit`):** bloqueia o stage de arquivos `.env`/`.env.*`/`.pem`/`.key` (exceto `.env.example`) e roda `gitleaks git --staged` antes do commit ser gravado localmente (evitando `push` acidental no repositório público).
   - **CI (`.github/workflows/ci.yml`):** varre o histórico de commits no servidor a cada `push` e `pull_request` (garantindo a regra mesmo se um commit local usar `--no-verify`).
 - Variáveis de produção só nos painéis Render/Vercel/Supabase.
 - Rotação planejada para: chave do banco, `SUPABASE_SERVICE_ROLE_KEY`, chave do e-mail, segredo de sessão.

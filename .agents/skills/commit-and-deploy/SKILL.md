@@ -121,9 +121,11 @@ Ao manter ou evoluir `.githooks/pre-commit` e `.github/workflows/ci.yml`, preser
 
 | Camada | Arquivo | Tempo Alvo | Responsabilidade |
 |---|---|---|---|
-| **Pré-commit Local** | [.githooks/pre-commit](../../../.githooks/pre-commit) | `< 1 s` | Bloquear arquivos `.env`/`.pem`/`.key` no stage e rodar `gitleaks protect --staged --redact`. **Não** incluir build nem suíte de testes aqui para não gerar atrito local. |
+| **Pré-commit Local** | [.githooks/pre-commit](../../../.githooks/pre-commit) | `< 1 s` | Bloquear arquivos `.env`/`.env.*`/`.pem`/`.key` (exceto `.env.example`) no stage e rodar `gitleaks git --staged --redact`. **Não** incluir build nem suíte de testes aqui para não gerar atrito local. |
 | **CI — Segurança** | [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) (`security`) | `~15 s` | Rodar `gitleaks-action@v2` em todo o histórico (`fetch-depth: 0`) a cada `push` e `pull_request`. |
-| **CI — Qualidade & API** | [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) (`api`) | `~1–2 min` | Rodar em **Node.js `24.20.0`** com serviço **PostgreSQL 16**: `bun install --frozen-lockfile` → `format:check` → `lint` → `typecheck` → `test` → `test:e2e` → `build`. |
+| **CI — Shared** | [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) (`shared`) | `~30 s` | Rodar `format:check` (Prettier), `build`, `lint` (`Oxlint --type-aware`) e `typecheck` de `@infosys/shared`. |
+| **CI — Qualidade & API** | [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) (`api`) | `~1–2 min` | Rodar em **Node.js `24.20.0`** com serviço **PostgreSQL 16**: `bun install --frozen-lockfile` → `build:shared` → `lint` → `typecheck` → `test` (unitários) → `test:e2e` → `build`. |
+| **CI — Qualidade & Web** | [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) (`web`) | `~1 min` | Rodar em **Node.js `24.20.0`**: `bun install --frozen-lockfile` → `build:shared` → `lint` (`Oxlint --type-aware`) → `typecheck` → `test` (Vitest) → `build` (Vite + PWA). |
 
 ---
 

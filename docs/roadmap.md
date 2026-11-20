@@ -7,7 +7,7 @@ Público e de alto nível. Detalhes de priorização comercial ficam fora do rep
 - [✔] ADRs 0001–0009 decididas
 - [✔] Prova de conceito de runtime (Node vs Bun) e integrações críticas
 - [✔] Garantir atualização da documentação por meio de skills e revisão com IA
-- [ ] Monorepo, CI, lint, testes, gitleaks
+- [✔] Monorepo, CI, lint, testes, gitleaks
 - [ ] Better Auth + organizations + isolamento por tenant com teste
 - [ ] Deploy de "hello world" em produção (domínios, cookies, Sentry)
 

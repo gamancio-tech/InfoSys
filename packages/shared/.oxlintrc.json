@@ -1,0 +1,12 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": ["dist/**", "node_modules/**"],
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "no-console": "warn"
+  }
+}
+

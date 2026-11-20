@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,6 +18,7 @@ jobs:
   security:
     name: Segredos (Gitleaks)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
@@ -25,12 +30,51 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  shared:
+    name: Shared (Lint, Typecheck e Build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (.node-version)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: Setup Bun (packageManager)
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: 'package.json'
+
+      - name: Cache de dependências do Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Instalar workspaces
+        run: bun install --frozen-lockfile
+
+      - name: Verificar formatação (Prettier)
+        run: bun run format:check
+
+      - name: Build @infosys/shared
+        run: bun run build:shared
+
+      - name: Lint @infosys/shared
+        run: bun run --cwd packages/shared lint
+
+      - name: Typecheck @infosys/shared
+        run: bun run --cwd packages/shared typecheck
+
   api:
     name: API (Lint, Typecheck, Testes e Build)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/api
+    timeout-minutes: 10
 
     services:
       postgres:
@@ -60,32 +104,89 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 24.20.0 (ADR-0002)
+      - name: Setup Node.js (.node-version)
         uses: actions/setup-node@v4
         with:
-          node-version: '24.20.0'
+          node-version-file: '.node-version'
 
-      - name: Setup Bun
+      - name: Setup Bun (packageManager)
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: 'package.json'
 
-      - name: Instalar dependências
+      - name: Cache de dependências do Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Instalar workspaces
         run: bun install --frozen-lockfile
 
-      - name: Verificar formatação (Prettier)
-        run: bun run format:check
+      - name: Build @infosys/shared
+        run: bun run build:shared
 
       - name: Lint (Oxlint type-aware)
-        run: bun run lint
+        run: bun run --cwd apps/api lint
 
       - name: Typecheck (TypeScript)
-        run: bun run typecheck
+        run: bun run --cwd apps/api typecheck
 
       - name: Testes unitários (Jest)
-        run: bun run test
+        run: bun run --cwd apps/api test
 
       - name: Testes de integração / E2E (Jest)
-        run: bun run test:e2e
+        run: bun run --cwd apps/api test:e2e
 
       - name: Build de produção
-        run: bun run build
+        run: bun run --cwd apps/api build
 
+  web:
+    name: Web (Lint, Typecheck, Testes e Build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      VITE_API_URL: /v1
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (.node-version)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: Setup Bun (packageManager)
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: 'package.json'
+
+      - name: Cache de dependências do Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Instalar workspaces
+        run: bun install --frozen-lockfile
+
+      - name: Build @infosys/shared
+        run: bun run build:shared
+
+      - name: Lint (Oxlint type-aware)
+        run: bun run --cwd apps/web lint
+
+      - name: Typecheck (TypeScript)
+        run: bun run --cwd apps/web typecheck
+
+      - name: Testes unitários (Vitest)
+        run: bun run --cwd apps/web test
+
+      - name: Build de produção (Vite + PWA)
+        run: bun run --cwd apps/web build
