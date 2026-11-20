@@ -16,11 +16,13 @@
 
 | Variável | Onde | Descrição |
 |---|---|---|
+| `NODE_ENV` / `PORT` | API | Ambiente (`development`, `test`, `production`) e porta HTTP (`3000`) |
 | `DATABASE_URL` | API | Conexão pelo **pooler** (aplicação) |
 | `DIRECT_URL` | API | Conexão **direta** (migrations e pg-boss) |
 | `BETTER_AUTH_SECRET` | API | Segredo de sessão (≥ 32 caracteres) |
 | `BETTER_AUTH_URL` | API | URL pública da API |
 | `WEB_ORIGIN` | API | Origem permitida (CORS/cookies) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | API | Credenciais OAuth para login com Google (`RF-AUT-002`) |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | API | Storage (só no servidor) |
 | `RESEND_API_KEY` / `MAIL_FROM` | API | E-mail |
 | `SENTRY_DSN` | API/Web | Erros |

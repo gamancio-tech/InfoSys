@@ -1,0 +1,16 @@
+# Padroniza quebras de linha para LF em todo o monorepo (Windows local <-> Linux CI/Docker/Render/Vercel)
+* text=auto eol=lf
+
+# Arquivos binários
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
