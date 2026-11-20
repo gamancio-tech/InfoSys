@@ -20,11 +20,17 @@ Convenção: **docs-as-code**. Tudo em Markdown + Mermaid, versionado com o cód
 | — | [Lições do protótipo](licoes-do-prototipo.md) | O que o protótipo ensinou | Estático |
 | — | [ADRs](adr/) | Decisões de arquitetura e por quê | Uma nova por decisão |
 
-## Convenção de IDs
+## Convenção de IDs e Commits
 
-- `RF-<MÓDULO>-NNN` requisito funcional · `RNF-NNN` não funcional · `RN-NNN` regra de negócio.
+- `RF-<MÓDULO>-NNN` requisito funcional · `RNF-NNN` não funcional · `RN-NNN` regra de negócio · `ADR-NNNN` decisão arquitetural.
 - IDs **nunca** são reaproveitados. Requisito removido fica marcado como `Descartado`.
-- Referencie o ID em commits, PRs e nomes de testes: `feat(agenda): conflito de horário (RF-AGE-004, RN-007)`.
+- **Padrão de commits (Conventional Commits em português):** cabeçalho no infinitivo com IDs entre parênteses + corpo em bullets iniciados por verbo no presente:
+  ```text
+  feat(appointments): detectar conflito de horário sem bloquear (RF-AGE-004, RN-006)
+
+  - Implementa verificação de sobreposição de intervalo no AppointmentsService
+  - Adiciona testes unitários e de isolamento entre organizações (RNF-004)
+  ```
 - Para listar a cobertura: `git log --grep "RF-AGE-004"` e `grep -r "RF-AGE-004" apps/ test/`.
 
 ## Status de documento

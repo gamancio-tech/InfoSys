@@ -70,6 +70,9 @@
 
 ### Estrutura do Monorepo ([03-arquitetura.md](../docs/03-arquitetura.md))
 ```text
+.agents/                  # Contexto do projeto, rules (docs-as-code, commit-ci-deploy) e skills (infosys-context, docs-sync, commit-and-deploy)
+.github/workflows/        # CI no GitHub Actions (ci.yml: jobs security e api)
+.githooks/                # Hook nativo de pre-commit (bloqueio de .env/chaves + gitleaks)
 apps/
   api/                    # NestJS (Monólito Modular)
     src/
@@ -166,16 +169,25 @@ Em código, banco de dados e rotas, utilizar sempre o termo em inglês correspon
 
 ## 7. Qualidade, Testes, Rastreabilidade e Lições do Protótipo
 
-### Rastreabilidade por ID ([docs/README.md](../docs/README.md), [08-testes.md](../docs/08-testes.md))
-- Todo requisito possui um ID único: `RF-<MÓDULO>-NNN`, `RNF-NNN` ou `RN-NNN`.
+### Rastreabilidade por ID e Padrão de Commits ([docs/README.md](../docs/README.md), [08-testes.md](../docs/08-testes.md), [commit-and-deploy](skills/commit-and-deploy/SKILL.md))
+- Todo requisito possui um ID único: `RF-<MÓDULO>-NNN`, `RNF-NNN`, `RN-NNN` ou `ADR-NNNN`.
 - **IDs nunca são reaproveitados.** Requisitos cancelados permanecem na tabela marcados como `Descartado`.
 - Commits, PRs e blocos `describe`/`it` de testes **devem citar os IDs implementados**:
-  - Exemplo de commit: `feat(agenda): detectar conflito de horário sem bloquear (RF-AGE-004, RN-006)`
-  - Exemplo de teste: `describe('RF-AGE-004 · conflito de horário', () => { it('avisa sem bloquear (RN-006)', ...) })`
+  - **Formato oficial de commit (duas partes — cabeçalho no infinitivo + corpo em bullets no presente):**
+    ```text
+    feat(appointments): detectar conflito de horário sem bloquear (RF-AGE-004, RN-006)
 
-### Testes Obrigatórios que Bloqueiam Merge no CI
+    - Implementa verificação de sobreposição de intervalo no AppointmentsService
+    - Adiciona testes unitários e de isolamento entre organizações (RNF-004)
+    ```
+  - **Exemplo de teste:** `describe('RF-AGE-004 · conflito de horário', () => { it('avisa sem bloquear (RN-006)', ...) })`
+
+### Testes Obrigatórios, Pré-Commit e CI ([08-testes.md](../docs/08-testes.md), [07-seguranca.md](../docs/07-seguranca.md))
+- **Alinhamento Pré-commit vs CI:**
+  - **Pré-commit local (`.githooks/pre-commit`):** Focado em feedback instantâneo (< 1s) para bloquear arquivos `.env`/`.pem`/`.key` no stage e rodar `gitleaks protect --staged` antes do commit existir localmente.
+  - **CI (`.github/workflows/ci.yml`):** Barreira completa no GitHub Actions com 2 jobs paralelos: `security` (`gitleaks`) e `api` (`format:check` Prettier → `lint` Oxlint type-aware → `typecheck` → `test` unitários Jest em Node 24.20.0 → `test:e2e` com Postgres 16 em serviço → `build`).
 1. **Isolamento Multi-tenant (`RNF-004`):** Para cada controller/endpoint, testar com dois usuários de organizações distintas (Org A e Org B); Org B jamais pode ler, listar, editar ou excluir dados da Org A (deve receber `404`).
-2. **Regras de Negócio (`RN-*`):** Meta de 100% de cobertura unitária (Jest na API, Vitest na Web) com ID no nome do teste.
+2. **Regras de Negócio (`RN-*`, `RNF-011`):** Meta de 100% de cobertura unitária (Jest na API, Vitest na Web) com ID no nome do teste.
 3. **Precisão Monetária (`RN-011`):** Testes de cálculo de orçamento/totais usando `Decimal` e casos de arredondamento.
 4. **Datas e Fuso Horário (`RN-012`):** Garantir que cálculo de recorrência (`RN-009`) não quebre em viradas de fuso.
 

@@ -22,7 +22,9 @@
 
 ## Segredos
 
-- Nada de segredo no repositório; `.env.example` só com nomes. `gitleaks` no pré-commit e no CI. 🔴
+- Nada de segredo no repositório; `.env.example` só com nomes. Defesa em duas camadas complementares: 🔴
+  - **Pré-commit local (`.githooks/pre-commit`):** bloqueia o stage de arquivos `.env`/`.pem`/`.key` e roda `gitleaks protect --staged` antes do commit ser gravado localmente (evitando `push` acidental no repositório público).
+  - **CI (`.github/workflows/ci.yml`):** varre o histórico de commits no servidor a cada `push` e `pull_request` (garantindo a regra mesmo se um commit local usar `--no-verify`).
 - Variáveis de produção só nos painéis Render/Vercel/Supabase.
 - Rotação planejada para: chave do banco, `SUPABASE_SERVICE_ROLE_KEY`, chave do e-mail, segredo de sessão.
 - A `service_role` do Supabase **nunca** vai para o front.

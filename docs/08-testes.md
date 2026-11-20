@@ -33,9 +33,15 @@ describe('RF-MAN-002 · recalcular próxima manutenção', () => {
 - Fábricas (`createOrganization`, `createCustomer`...) em `apps/api/test/factories`.
 - Cada teste de integração roda em transação revertida ou schema limpo.
 
-## CI
+## Pré-commit e CI
 
-Lint → typecheck → unitários → integração (Postgres em serviço) → gitleaks → build. E2E em `main` e antes de release.
+Divisão entre validação local rápida e esteira completa no servidor:
+
+- **Pré-commit local (`.githooks/pre-commit`, < 1 s):** ativado via `git config core.hooksPath .githooks` (`bun run prepare`). Faz apenas verificações instantâneas de segurança (bloqueio de `.env`/chaves no stage + `gitleaks protect --staged`), sem rodar build ou suíte de testes para não travar o fluxo de commits.
+- **CI no GitHub Actions (`.github/workflows/ci.yml`):**
+  - **Job `security`:** `gitleaks` em todo `push` e `pull_request`.
+  - **Job `api`:** `format:check` (Prettier) → `lint` (Oxlint type-aware) → `typecheck` (`tsc --noEmit`) → unitários (Jest em Node 24.20.0) → integração/E2E (Jest + Postgres 16 em serviço) → `build` (`nest build`).
+  - **E2E (Playwright):** em `main` e antes de release (quando `apps/web` estiver ativo).
 
 ## Metas
 

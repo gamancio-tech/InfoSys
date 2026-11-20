@@ -141,7 +141,7 @@ Marque **✔ confirmado** apagando o `?` na coluna `Ok?` quando revisar.
 | RNF-008 | Acessibilidade | Contraste e navegação por teclado nas telas principais (WCAG AA como meta) | Lighthouse |
 | RNF-009 | Observabilidade | Erros no Sentry; logs estruturados com `organizationId` e `requestId` | Revisão |
 | RNF-010 | Privacidade | Dados pessoais mapeados e com prazo de retenção (LGPD) | [07](07-seguranca.md) |
-| RNF-011 | Manutenibilidade | Cobertura mínima de testes nas regras de negócio: TODO % | CI |
+| RNF-011 | Manutenibilidade | Cobertura mínima de testes nas regras de negócio: 100 % | CI |
 | RNF-012 | Compatibilidade | Últimas 2 versões de Chrome, Safari (iOS) e Firefox | Teste manual |
 
 ## 3. Regras de negócio

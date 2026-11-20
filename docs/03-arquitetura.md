@@ -66,6 +66,9 @@ flowchart LR
 ## Estrutura do repositório (monorepo)
 
 ```
+.agents/                  # contexto do projeto, rules e skills para trabalho assistido por IA
+.github/workflows/        # esteira de CI (gitleaks, lint, typecheck, testes, build)
+.githooks/                # hook nativo de pre-commit (bloqueio de .env/chaves + gitleaks)
 apps/
   api/                    # NestJS
     src/
@@ -84,7 +87,7 @@ apps/
       app/                # rotas, providers, PWA
 packages/
   shared/                 # schemas Zod, enums, tipos comuns
-docs/
+docs/                     # documentação docs-as-code + ADRs
 ```
 
 ## Regras de dependência

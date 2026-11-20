@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    name: Segredos (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Varredura de segredos (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  api:
+    name: API (Lint, Typecheck, Testes e Build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: infosys_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/infosys_test?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/infosys_test?schema=public
+      BETTER_AUTH_SECRET: ci-test-only-secret-key-with-at-least-32-chars
+      BETTER_AUTH_URL: http://localhost:3000
+      WEB_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24.20.0 (ADR-0002)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Instalar dependências
+        run: bun install --frozen-lockfile
+
+      - name: Verificar formatação (Prettier)
+        run: bun run format:check
+
+      - name: Lint (Oxlint type-aware)
+        run: bun run lint
+
+      - name: Typecheck (TypeScript)
+        run: bun run typecheck
+
+      - name: Testes unitários (Jest)
+        run: bun run test
+
+      - name: Testes de integração / E2E (Jest)
+        run: bun run test:e2e
+
+      - name: Build de produção
+        run: bun run build
+

@@ -139,14 +139,16 @@ Use o guia abaixo para mapear cada tipo de alteração realizada aos documentos 
 
 ---
 
-### 2.8. Mudanças na Estratégia de Testes, Factories ou Pipeline de CI
-- **Gatilhos:** Configuração de Jest, Vitest, Supertest, Testcontainers, Playwright ou k6; criação de factories em `apps/api/test/factories`; alteração nas etapas do GitHub Actions (CI) ou definição da meta percentual de cobertura (`RNF-011`).
-- **Impacto ao Projeto:** 🟡 **Médio / 🟠 Alto** — Define o que bloqueia merge e garante a rede de segurança para o desenvolvedor solo.
+### 2.8. Mudanças na Estratégia de Testes, Pré-Commit, Factories ou Pipeline de CI
+- **Gatilhos:** Configuração de Jest, Vitest, Supertest, Testcontainers, Playwright ou k6; criação de factories em `apps/api/test/factories`; alteração em `.githooks/pre-commit` ou nas etapas do GitHub Actions (`.github/workflows/ci.yml`); mudanças na meta de cobertura (`RNF-011`).
+- **Impacto ao Projeto:** 🟡 **Médio / 🟠 Alto** — Define o alinhamento entre a barreira local rápida (`pre-commit`) e a barreira completa que bloqueia merge no servidor (`CI`).
 - **Onde Atualizar:**
   1. **[docs/08-testes.md](../../../docs/08-testes.md):**
-     - `## Pirâmide`, `## Obrigatórios (bloqueiam merge)`, `## Dados de teste`, `## CI` e `## Metas`.
-  2. **[docs/02-requisitos.md](../../../docs/02-requisitos.md):**
-     - Preencher o `TODO %` em `RNF-011` e atualizar a referência ao script de rastreabilidade (`scripts/trace.sh`) quando implementado.
+     - `## Pirâmide`, `## Obrigatórios (bloqueiam merge)`, `## Dados de teste`, `## Pré-commit e CI` e `## Metas`.
+  2. **[docs/07-seguranca.md](../../../docs/07-seguranca.md):**
+     - Se a mudança afetar a varredura de segredos (`gitleaks`) no `.githooks/pre-commit` ou no `.github/workflows/ci.yml`, atualizar a seção `## Segredos`.
+  3. **[docs/02-requisitos.md](../../../docs/02-requisitos.md):**
+     - Atualizar `RNF-011` e a referência ao script de rastreabilidade (`scripts/trace.sh`) quando implementado.
 
 ---
 
